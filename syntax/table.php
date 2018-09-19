@@ -157,9 +157,13 @@ class syntax_plugin_data_table extends DokuWiki_Syntax_Plugin {
                     $column = $this->dthlp->_column($line[1]);
                     $sort = $column['key'];
                     if(substr($sort, 0, 1) == '^') {
-                        $data['sort'] = array(substr($sort, 1), 'DESC');
+                        //realab.ai heng.li
+                        //$data['sort'] = array(substr($sort, 1), 'DESC');
+                        $data['sort'] = array(substr($sort, 1), 'DESC', $column['type']);
                     } else {
-                        $data['sort'] = array($sort, 'ASC');
+                        //realab.ai heng.li
+                        //$data['sort'] = array($sort, 'ASC');
+                        $data['sort'] = array($sort, 'ASC', $column['type']);
                     }
                     break;
                 case 'where':
@@ -420,8 +424,16 @@ class syntax_plugin_data_table extends DokuWiki_Syntax_Plugin {
             }
 
             // Clickable header for dynamic sorting
-            $text .= '<a href="' . wl($ID, array('datasrt' => $ckey) + $cur_params) .
-                '" title="' . $this->getLang('sort') . '">' . hsc($head) . '</a>';
+            // realab.ai heng.li
+            //$text .= '<a href="' . wl($ID, array('datasrt' => $ckey) + $cur_params) .
+            //    '" title="' . $this->getLang('sort') . '">' . hsc($head) . '</a>';
+            if($ckey{0} == '^') {
+                $text .= '<a href="' . wl($ID, array('datasrt' => '^'.$data[cols][substr($ckey, 1)][colname]) + $cur_params) .
+                    '" title="' . $this->getLang('sort') . '">' . hsc($head) . '</a>';
+            } else {
+                $text .= '<a href="' . wl($ID, array('datasrt' => $data[cols][$ckey][colname]) + $cur_params) .
+                    '" title="' . $this->getLang('sort') . '">' . hsc($head) . '</a>';
+            }
             $text .= '</th>';
         }
         $text .= '</tr>';
@@ -628,7 +640,24 @@ class syntax_plugin_data_table extends DokuWiki_Syntax_Plugin {
                     $from .= ' AND ' . $tables[$col] . ".key = " . $sqlite->quote_string($col);
                 }
 
-                $order = 'ORDER BY ' . $tables[$col] . '.value ' . $data['sort'][1];
+                //realab.ai heng.li
+                $type = $data['cols'][$col]['type'];
+                $sorttype = $data['sort'][2];
+                if($type == 'num'
+                        || $type == 'number'
+                        || $type == 'int'
+                        || $type == 'integer'
+                        || $type == 'long'
+                        || $sorttype == 'num'
+                        || $sorttype == 'number'
+                        || $sorttype == 'int'
+                        || $sorttype == 'integer'
+                        || $sorttype == 'long'){
+                    $order = 'ORDER BY ' . 'CAST( '. $tables[$col] . '.value ' . 'AS integer) ' . $data['sort'][1];
+                }
+                else {
+                    $order = 'ORDER BY ' . $tables[$col] . '.value ' . $data['sort'][1];
+                }
             }
         } else {
             $order = 'ORDER BY 1 ASC';
@@ -703,9 +732,15 @@ class syntax_plugin_data_table extends DokuWiki_Syntax_Plugin {
         if($this->hasRequestFilter()) {
             if(isset($_REQUEST['datasrt'])) {
                 if($_REQUEST['datasrt']{0} == '^') {
-                    $data['sort'] = array(substr($_REQUEST['datasrt'], 1), 'DESC');
+                    //realab.ai heng.li
+                    //$data['sort'] = array(substr($_REQUEST['datasrt'], 1), 'DESC');
+                    $columns=$this->dthlp->_column(substr($_REQUEST['datasrt'], 1));
+                    $data['sort'] = array($columns['key'], 'DESC', $columns['type']);
                 } else {
-                    $data['sort'] = array($_REQUEST['datasrt'], 'ASC');
+                    //realab.ai heng.li
+                    //$data['sort'] = array($_REQUEST['datasrt'], 'ASC');
+                    $columns=$this->dthlp->_column($_REQUEST['datasrt']);
+                    $data['sort'] = array($columns['key'], 'ASC', $columns['type']);
                 }
             }
 
