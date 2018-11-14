@@ -653,7 +653,7 @@ class syntax_plugin_data_table extends DokuWiki_Syntax_Plugin {
                         || $sorttype == 'int'
                         || $sorttype == 'integer'
                         || $sorttype == 'long'){
-                    $order = 'ORDER BY ' . 'CAST( '. $tables[$col] . '.value ' . 'AS integer) ' . $data['sort'][1];
+                    $order = 'ORDER BY ' . 'CAST( '. $tables[$col] . '.value ' . 'AS float) ' . $data['sort'][1];
                 }
                 else {
                     $order = 'ORDER BY ' . $tables[$col] . '.value ' . $data['sort'][1];
